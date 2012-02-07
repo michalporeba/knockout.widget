@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>knockout.widget sample</title>
+        <script type="text/javascript" src="lib/knockout-latest.debug.js"></script>
+        <script type="text/javascript" src="lib/jquery.min.js"></script>
+        <script type="text/javascript" src="knockout.widget.js"></script>
+        <style type="text/css">
+            .somedecoration { margin: 1em; padding: 1em; border: .2em solid red; }
+        </style>
+    </head>
+    <body>
+        <div data-bind="widget: true">
+            <div data-bind="testWidget: 'A nesting widget'">
+                <div data-bind="widget: true">
+            <div data-bind="testWidget: 'and a nested one'"></div>
+        </div>
+            </div>
+        </div>
+        <div data-bind="widget: true">
+            <div data-bind="testWidget: 'Standalone widget'"></div>
+        </div>
+    
+    <script type="text/javascript">
+    
+    ko.bindingHandlers['testWidget'] = (function () { 
+    
+        function randomDelay() { 
+            return (Math.floor(Math.random()*5)+1)*150;
+        }
+        function TestWidgetViewModel(message) { 
+            var self = this,
+                intervalId = null;
+            
+            self.display = ko.observable('');
+            self.message = message;
+            
+            setInterval(function() { 
+                    var d = ko.utils.unwrapObservable(self.display);
+                    if (d.length < self.message.length) {
+                        self.display(d+self.message[d.length]);
+                    } else { 
+                        clearInterval(intervalId);
+                    }
+                }, randomDelay());
+       }
+       
+       return {
+           init: function (element, valueAccessor, allBindingsAccessor, viewModel) { 
+               //cache parameters
+               var value = ko.utils.unwrapObservable(valueAccessor()); 
+               viewModel = ko.utils.extend(viewModel, new TestWidgetViewModel(value));
+               
+                //here a much more complex structure could be injected with bindings
+                $(element).addClass('somedecoration').prepend('<h4><span data-bind="text: display"></span></h4>');
+           }
+       };
+    }());   
+    </script>
+    
+    <script type="text/javascript">
+        ko.applyWidgetBindings();
+        //just for testing to see if the above is not breaking anything
+        ko.applyBindings();
+    </script>
+    </body> 
+</html>
